@@ -1,0 +1,80 @@
+# ----------------------------
+# Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+.eggs/
+*.log
+*.out
+*.err
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.ipynb_checkpoints/
+
+# ----------------------------
+# Data
+# ----------------------------
+data/
+datasets/
+*.csv
+*.tsv
+*.json
+*.xlsx
+*.zip
+
+# Large raw files
+*.tar
+*.gz
+*.pkl
+*.pt
+*.bin
+
+# ----------------------------
+# Checkpoints & Models
+# ----------------------------
+checkpoints/
+models/
+output/
+runs/
+*.ckpt
+*.pth
+*.pt
+*.bin
+*.h5
+
+# Hugging Face cache
+.huggingface/
+transformers_cache/
+~/.cache/huggingface/
+cache/
+
+# ----------------------------
+# Jupyter Notebook
+# ----------------------------
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# ----------------------------
+# Logs & Debug
+# ----------------------------
+logs/
+wandb/
+mlruns/
+tensorboard/
+lightning_logs/
+
+# ----------------------------
+# IDE & OS Specific
+# ----------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+notes/
