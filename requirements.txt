@@ -3,3 +3,6 @@ datasets
 accelerate 
 evaluate 
 seqeval
+gradio 
+pandas
+torch
