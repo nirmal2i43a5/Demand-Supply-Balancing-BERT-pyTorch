@@ -1,5 +1,7 @@
-﻿# Fine-Tuning-BERT-for-NER-in-Hydropower-Supply-Monitoring
+﻿# Fine-Tuning Transformer Models (BERT & BioBERT) for Biomedical NER
 
 
-This project is about fine tuning BERT for Named Entity Recognition (NER) to detect hydropower disruptions and support real-time electricity supply monitoring
+This project applies fine-tuning techniques on BERT and BioBERT to perform Named Entity Recognition (NER) on the BC5CDR dataset, focusing on extracting disease and chemical entities from biomedical text. It demonstrates model comparison, training, and evaluation for real-world healthcare NLP applications.
+
+
 
