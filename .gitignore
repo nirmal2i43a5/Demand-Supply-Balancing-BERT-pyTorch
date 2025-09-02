@@ -39,6 +39,7 @@ ENV/
 # Checkpoints & Models
 # ----------------------------
 checkpoints/
+checkpoint-*/
 models/
 output/
 runs/
@@ -77,3 +78,4 @@ lightning_logs/
 .DS_Store
 Thumbs.db
 notes/
+data/
