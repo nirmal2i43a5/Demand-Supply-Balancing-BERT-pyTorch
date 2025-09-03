@@ -1,0 +1,32 @@
+body 
+{
+    font-family: system-ui, Arial, sans-serif;
+    margin: 2rem;
+    max-width: 900px;
+}
+
+textarea
+ {
+    width: 100%;
+    padding: .75rem;
+}
+
+button 
+{
+    padding: .5rem .9rem;
+    margin-top: .5rem;
+}
+
+table 
+{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td 
+{
+    border-bottom: 1px solid #eee;
+    padding: .5rem;
+    text-align: left;
+}
