@@ -1,0 +1,54 @@
+
+.git
+.gitignore
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+env/
+venv/
+.env
+.venv
+
+# Jupyter notebook checkpoints
+notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+tests/
+.pytest_cache/
+.coverage
+
+# Documentation
+*.md
+docs/
+
+
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Docker files
+Dockerfile
+.dockerignore
