@@ -3,8 +3,7 @@ from typing import List, Dict
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 import torch
 
-MODEL_PATH = os.getenv("MODEL_PATH", os.path.join(os.path.dirname(__file__), "..", "models", "bert_ner_baseline_v1"))
-
+MODEL_PATH = os.getenv("MODEL_PATH", "outputs/models/biobert_ner_baseline_v1")
 
 def fix_subword_tokens(text, ner_results):
     
