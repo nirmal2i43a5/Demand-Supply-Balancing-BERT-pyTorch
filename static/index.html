@@ -3,114 +3,150 @@
 <head>
   <meta charset="utf-8"/>
   <title>Biomedical NER</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    mark.ent { padding: 0 .2rem; border-radius: .25rem; }
-    mark.CHEMICAL { background: #fde68a; } /* amber */
-    mark.DISEASE  { background: #bbf7d0; } /* green */
-  </style>
+    <link rel="stylesheet" href="/static/style.css?v=2">
+    
 </head>
 
 <body>
-  <h1>V1 : Biomedical NER</h1>
-  <textarea id="input" rows="4" placeholder="For example: Aspirin can cause gastric bleeding in some patientities with Diabetes."></textarea>
-  <div><button id="predict">Predict</button></div>
+  <div class="wrap">
+    <h1>Biomedical NER (Text or PDF)</h1>
+    <p class="muted">Paste text or upload a file, then extract CHEMICAL / DISEASE entities.</p>
 
-  <h3 id="highlightHeader" style="display:none;">Highlighted Text</h3>
-  <div id="highlight"></div>
+    <!-- Input -->
+    <section class="card">
+      <div class="row" style="margin-bottom:8px;">
+        <label class="radio"><input type="radio" name="mode" value="text" checked> Text</label>
+        <label class="radio"><input type="radio" name="mode" value="file"> PDF / .txt</label>
+      </div>
 
-  <h3 id="entitiesHeader" style="display:none;">Entities</h3>
-  <div id="table"></div>
+      <div id="textMode">
+        <textarea id="input" placeholder="Type or paste text here…"></textarea>
+      </div>
 
+      <div id="fileMode" style="display:none;">
+        <input id="fileInput" type="file" accept=".pdf,.txt,text/plain,application/pdf"/>
+        <p class="muted" style="margin:8px 0 0 0;">Supports PDF or plain .txt.</p>
+      </div>
 
+      <div style="margin-top:10px;">
+        <button id="predict">Predict</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="card">
+      <div class="legend" style="margin-bottom:8px;">
+        <span class="chip"><span class="swatch" style="background:#fef08a"></span> Chemical</span>
+        <span class="chip"><span class="swatch" style="background:#bbf7d0"></span> Disease</span>
+      </div>
+
+      <h3 id="highlightHeader" style="display:none; margin:10px 0 6px;">Highlighted Results</h3>
+      <p id="meta" class="muted" style="display:none; margin:0 0 8px;"></p>
+      <div id="highlight"></div>
+
+      <h3 id="entitiesHeader" style="display:none; margin:16px 0 6px;">Entities</h3>
+      <div id="table"></div>
+    </section>
+  </div>
 
 <script>
-const API = "http://localhost:8000/predict";
+const API_TEXT = "http://localhost:8000/predict";
+const API_FILE = "http://localhost:8000/predict_file";
 
 const input = document.getElementById("input");
+const fileInput = document.getElementById("fileInput");
 const btn = document.getElementById("predict");
 const highlight = document.getElementById("highlight");
+const meta = document.getElementById("meta");
 const table = document.getElementById("table");
+const textModeDiv = document.getElementById("textMode");
+const fileModeDiv = document.getElementById("fileMode");
+const modeRadios = document.querySelectorAll('input[name="mode"]');
+const highlightHeader = document.getElementById("highlightHeader");
+const entitiesHeader = document.getElementById("entitiesHeader");
+
+let mode = "text";
+modeRadios.forEach(r => r.addEventListener("change", () => {
+  mode = document.querySelector('input[name="mode"]:checked').value;
+  textModeDiv.style.display = (mode === "text") ? "block" : "none";
+  fileModeDiv.style.display = (mode === "file") ? "block" : "none";
+}));
 
 btn.onclick = async () => {
-  const text = input.value.trim();
-  if (!text) return alert("Enter some text");
+  try {
+    btn.disabled = true; btn.textContent = "Predicting…";
+    const payload = await (mode === "text" ? predictFromText() : predictFromFile());
+    const { text, entities, source, filename } = payload;
 
-  const res = await fetch(API, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ text })
-  });
-  const entities = await res.json();
+    highlightHeader.style.display = "block";
+    entitiesHeader.style.display = "block";
+    meta.style.display = "block";
+    meta.textContent = source === "file"
+      ? `Source: ${filename} • ${text.length.toLocaleString()} chars`
+      : `Source: Text • ${text.length.toLocaleString()} chars`;
 
-  renderHighlight(text, entities);
-  renderTable(text, entities);
+    renderHighlight(text, entities);
+    renderTable(text, entities);
+  } catch (e) {
+    alert(e.message || e);
+  } finally {
+    btn.disabled = false; btn.textContent = "Predict";
+  }
 };
 
-function renderHighlight(text, entities) {
-  if (!entities.length) { 
-    highlight.textContent = text; 
-    highlightHeader.style.display = "block";
-    return; 
-  }
-  highlightHeader.style.display = "block";
-  entitiesHeader.style.display = "block";
-  // sort by start
-  const sorted = [...entities].sort((a,b) => a.start - b.start);
+async function predictFromText(){
+  const text = (input.value || "").trim();
+  if(!text) throw new Error("Enter some text");
+  const res = await fetch(API_TEXT, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ text })
+  });
+  if(!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return await res.json();
+}
+async function predictFromFile(){
+  const f = fileInput.files?.[0];
+  if(!f) throw new Error("Choose a file");
+  const formData = new FormData(); formData.append("file", f);
+  const res = await fetch(API_FILE, { method:"POST", body: formData });
+  if(!res.ok){ const msg = await res.text().catch(()=>res.statusText); throw new Error(`Upload failed: ${res.status} ${msg}`); }
+  return await res.json();
+}
 
-  let html = "";
-  let cursor = 0;
-
-  for (const e of sorted) {
-    const start = e.start ?? 0;
-    const end = e.end ?? start;
-    const label = e.entity || "";
-    const piece = text.slice(start, end);
-
-    // plain text before the entity
+function renderHighlight(text, entities){
+  if(!entities?.length){ highlight.textContent = text; return; }
+  const sorted = [...entities].sort((a,b)=>(a.start??0)-(b.start??0));
+  let html = "", cursor = 0;
+  for(const e of sorted){
+    const start = e.start ?? 0, end = e.end ?? start;
+    const label = e.entity || ""; const piece = text.slice(start, end);
     html += escapeHtml(text.slice(cursor, start));
-
-    
-    // highlighted entity
-    html += `<mark class="ent ${escapeAttr(label)}">${escapeHtml(piece)}</mark>` 
-           ;
-
+    html += `<mark class="ent ${escapeAttr(label)}">${escapeHtml(piece)}</mark>`;
     cursor = end;
   }
-
-  // tail text
   html += escapeHtml(text.slice(cursor));
   highlight.innerHTML = html;
 }
 
-function renderTable(text, entities) {
-  if (!entities.length) { 
-    table.innerHTML = "<p style='color:#666'>No entities identified.</p>"; 
-    return; 
-  }
-
-  const rows = entities.map(e => {
+function renderTable(text, entities){
+  if(!entities?.length){ table.innerHTML = "<p class='muted'>No entities identified.</p>"; return; }
+  const rows = entities.map(e=>{
     const span = e.text || e.word || text.slice(e.start ?? 0, e.end ?? 0);
-    const label = e.entity || "";
-    const score = Number(e.score || 0).toFixed(4);
-    return `
-      <tr>
-        <td>${escapeHtml(span)}</td>
-        <td>${escapeHtml(label)}</td>
-        <td>${score}</td>
-      </tr>`;
+    const label = e.entity || ""; const score = Number(e.score || 0).toFixed(4);
+    return `<tr><td>${escapeHtml(span)}</td><td>${escapeHtml(label)}</td><td>${score}</td></tr>`;
   }).join("");
-
   table.innerHTML = `
     <table>
-      <thead><tr><th>Word</th><th>Entity</th><th>Score</th></tr></thead>
+      <thead><tr><th>Words</th><th>Entity</th><th>Score</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
 
-function escapeHtml(s=""){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function escapeAttr(s=""){ return String(s).replace(/[^a-zA-Z0-9_-]/g, ''); }
+function escapeHtml(s=""){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+function escapeAttr(s=""){ return String(s).replace(/[^a-zA-Z0-9_-]/g, ""); }
 </script>
 </body>
 </html>

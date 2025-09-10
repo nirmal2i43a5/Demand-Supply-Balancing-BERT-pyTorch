@@ -1,32 +1,161 @@
-body 
-{
-    font-family: system-ui, Arial, sans-serif;
-    margin: 2rem;
-    max-width: 900px;
+/* Theme variables */
+:root {
+  --bg: #f7f7f7;
+  --panel: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --brand: #2563eb;
 }
 
-textarea
- {
-    width: 100%;
-    padding: .75rem;
+/* Base layout */
+* {
+  box-sizing: border-box;
 }
 
-button 
-{
-    padding: .5rem .9rem;
-    margin-top: .5rem;
+body {
+  margin: 0;
+  padding: 16px;
+  font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
 }
 
-table 
-{
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
+.wrap {
+  max-width: 920px;
+  margin: 0 auto;
 }
 
-th, td 
-{
-    border-bottom: 1px solid #eee;
-    padding: .5rem;
-    text-align: left;
+h1 {
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Card container */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+/* Controls */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+label.radio {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+input[type="radio"] {
+  accent-color: var(--brand);
+}
+
+textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: #fafafa;
+  color: var(--muted);
+}
+
+button {
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Highlighted entities */
+mark.ent {
+  padding: 0 0.2rem;
+  border-radius: 0.2rem;
+}
+
+mark.CHEMICAL {
+  background: #fef08a; /* yellow */
+}
+
+mark.DISEASE {
+  background: #bbf7d0; /* light green */
+}
+
+/* Entities table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+thead th {
+  background: #f3f4f6;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+tbody td {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+}
+
+tbody tr:nth-child(odd) {
+  background: #fafafa;
+}
+
+/* Legend chips */
+.legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.92rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fafafa;
+}
+
+.chip .swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+  vertical-align: middle;
 }
