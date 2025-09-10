@@ -1,60 +1,70 @@
+# app/ner_pipeline.py
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 import torch
 
+from utils.chunked_ner_utils import load_pipeline ,chunked_ner
+
 MODEL_PATH = os.getenv("MODEL_PATH", "outputs/models/biobert_ner_baseline_v1")
 
-def fix_subword_tokens(text, ner_results):
+# def load_pipeline(
+#     model_path: str | None = None,
+#     aggregation_strategy: str = "simple",
+#     device: int | None = None,
+# ):
     
-    aggregated = []
-    current_entity =  None
+#     """Short-text pipeline (no windowing)."""
     
-    def label_of(r): 
-        return r.get("entity_group") or r.get("entity")
-    
-    for tok in ner_results:
-        if "start" not in tok or "end" not in tok: 
-            continue
-        
-        lbl = label_of(tok)
-        
-        if current_entity and lbl == current_entity["entity"] and tok["start"] == current_entity["end"]:
-            current_entity["end"] = tok["end"]
-            current_entity["word"] = text[current_entity["start"]:current_entity["end"]]
-            current_entity["score"] = max(current_entity["score"], float(tok.get("score", 0.0)))
-            
-        else:
-            if current_entity: 
-                aggregated.append(current_entity)
-                
-            current_entity = {
-                "entity": lbl,
-                "start": tok["start"],
-                "end": tok["end"],
-                "score": float(tok.get("score", 0.0)),
-                "word": text[tok["start"]:tok["end"]],
-            }
-    if current_entity: 
-        aggregated.append(current_entity)
-    
-    return aggregated
+#     model_path = model_path or MODEL_PATH
+#     tok = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+#     mdl = AutoModelForTokenClassification.from_pretrained(model_path)
+#     if device is None:
+#         device = 0 if torch.cuda.is_available() else -1
+#     return pipeline(
+#         task="token-classification",
+#         model=mdl,
+#         tokenizer=tok,
+#         device=device,
+#         aggregation_strategy=aggregation_strategy,
+#     )
 
+def predict_ner(pipeline_obj, text: str) -> List[Dict[str, Any]]:
+    raw = pipeline_obj(text)
+    # Already aggregated; return as-is for short texts
+    return [
+        {
+            "entity": r.get("entity_group") or r.get("entity"),
+            "score": float(r.get("score", 0.0)),
+            "word": r.get("word"),
+            "start": int(r["start"]),
+            "end": int(r["end"]),
+        }
+        for r in raw
+        if "start" in r and "end" in r
+    ]
 
-def load_pipeline():
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_fast=True)
-    model = AutoModelForTokenClassification.from_pretrained(MODEL_PATH)
-    device = 0 if torch.cuda.is_available() else -1
-    ner_pipeline = pipeline("token-classification", 
-                            model=model,
-                            tokenizer=tokenizer, 
-                            device=device, 
-                            aggregation_strategy="simple")
-    return ner_pipeline
+def load_chunked_pipeline(
+    model_path: str | None = None,
+    aggregation_strategy: str = "simple",
+    device: int | None = None,
+):
+    """Long-text capable pipeline (same model; helper wrapper)."""
+    return load_pipeline(
+        model_name_or_path=MODEL_PATH,
+        aggregation_strategy=aggregation_strategy,
+        device=device,
+    )
 
-
-
-def predict_ner(pipeline_obj, text: str):
-    raw = pipeline_obj(text)  # token-level
-    cleaned_ner = fix_subword_tokens(text, raw)
-    return cleaned_ner 
+def predict_ner(
+    pipeline_obj,
+    text: str,
+    max_tokens: int = 512,
+    stride_tokens: int = 128,
+):
+    return chunked_ner(
+        ner_pipe=pipeline_obj,
+        text=text,
+        max_tokens=max_tokens,
+        stride_tokens=stride_tokens,
+    )
