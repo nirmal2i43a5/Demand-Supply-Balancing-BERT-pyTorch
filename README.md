@@ -19,11 +19,13 @@
 
 # **Pipeline Architecture**
 
-![1757552867019](image/README/1757552867019.png)
+<img width="2000" height="1414" alt="Architecture" src="https://github.com/user-attachments/assets/1b15ef4b-416d-42ff-9db2-c9c94364be6a" />
+
 
 # **Demo**
 
-![1757556809043](image/README/1757556809043.gif)
+![Biobert Finetune](https://github.com/user-attachments/assets/9a529fe5-a7e9-457e-87c6-4cc120a20c61)
+
 
 # **Performance Metrics**
 
@@ -37,3 +39,4 @@
 * Fine-tuned BioBERT on BC5CDR dataset, boosting F1-score by 27% and accuracy by 9%.
 * Tuned hyperparameters to achieve 28% higher precision and 26% higher recall than baseline models.
 * Achieved robust evaluation using seqeval metrics, ensuring reliable entity extraction across biomedical text.
+
