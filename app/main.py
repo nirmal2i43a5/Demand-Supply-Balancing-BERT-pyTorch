@@ -50,6 +50,7 @@ def root():
 
 @app.post("/predict")
 def predict(payload: InText):
+    
     text = (payload.text or "").strip()
     
     if not text:
@@ -95,3 +96,8 @@ async def predict_file(file: UploadFile = File(...)):
                          "filename": file.filename, 
                          "text": text, 
                          "entities": entities})
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
