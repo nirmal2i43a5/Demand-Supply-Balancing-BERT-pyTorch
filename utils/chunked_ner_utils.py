@@ -40,10 +40,10 @@ def merge_subwords(ents, text):
 
 
 
-def _merge_touching(ents):
+def merge_touching(ents):
     
     """
-    Merge adjacent spans with the same label.
+    1. Merge adjacent spans with the same label.
     For instance, "New York" as could show sometimes as two tokens like (New and Work) separately
     both labeled as LOC(for location). 
     """
@@ -73,9 +73,9 @@ def _merge_touching(ents):
 
 def _windows(total, size, stride):
     
-    """
-    Token-index windows for sliding inference: [i, j) with overlap of `stride`.
-    """
+    
+    # Token-index windows for sliding inference: [i, j) with overlap of `stride`.
+    
     if size <= 0:
         raise ValueError("size must be > 0")
     
@@ -91,6 +91,7 @@ def _windows(total, size, stride):
         if j == total:
             break
         i = j - stride
+        
     return spans
 
 
@@ -114,9 +115,9 @@ def load_pipeline(model_name_or_path, aggregation_strategy="simple", device=None
 
 
 def chunked_ner(ner_pipe, text, max_tokens=512, stride_tokens=128):
-    """
-    Run NER over  long text by sliding a token window and Returns entity spans with offsets into the ORIGINAL text.
-    """
+    
+    # Run NER over  long text by sliding a token window and Returns entity spans with offsets into the ORIGINAL text.
+
     if not text:
         return []
 
@@ -180,7 +181,7 @@ def chunked_ner(ner_pipe, text, max_tokens=512, stride_tokens=128):
         if key not in best or e["score"] > best[key]["score"]:
             best[key] = e
 
-    merged = _merge_touching(list(best.values()))
+    merged = merge_touching(list(best.values()))
     
     merged.sort(key=lambda d: d["start"])
     
