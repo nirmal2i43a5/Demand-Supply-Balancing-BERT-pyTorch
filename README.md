@@ -23,6 +23,8 @@
 
 # **Demo**
 
+<img width="1452" height="907" alt="image" src="https://github.com/user-attachments/assets/134a7911-cda6-49f6-b72a-38b15026aa6a" />
+
 ![1757556809043](image/README/1757556809043.gif)
 
 # **Performance Metrics**
@@ -37,3 +39,4 @@
 * Fine-tuned BioBERT on BC5CDR dataset, boosting F1-score by 27% and accuracy by 9%.
 * Tuned hyperparameters to achieve 28% higher precision and 26% higher recall than baseline models.
 * Achieved robust evaluation using seqeval metrics, ensuring reliable entity extraction across biomedical text.
+
